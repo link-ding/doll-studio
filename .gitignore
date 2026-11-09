@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# build output of desktop-pet/build.sh
+desktop-pet/build/
+
+# MediaPipe files, downloaded by vendor/fetch-mediapipe.sh (desktop-pet/build.sh runs it)
+vendor/mediapipe/
+
+# the sample character is not published; build.sh bundles it only when it is present
+samples/
+
+# config backups DollPet makes
+*.dollpet-backup
+
+# promo video work in progress (another session); has a character PSD in it
+promo/

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".25"/></filter><filter id="card" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#3A1060" flood-opacity=".25"/></filter><linearGradient id="top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF5C8E"/><stop offset="1" stop-color="#E0245E"/></linearGradient><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EDE6FF"/></linearGradient></defs><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg)" filter="url(#sh)"/><g transform="translate(6 -14)">
+  <rect x="300" y="250" width="440" height="440" rx="120" fill="#7C5CFF" transform="rotate(-16 520 470)" filter="url(#card)"/>
+  <rect x="290" y="300" width="440" height="440" rx="120" fill="#FF6C98" transform="rotate(-6 510 520)" filter="url(#card)"/>
+  <rect x="282" y="352" width="440" height="440" rx="120" fill="#FFF3EC" transform="rotate(4 502 572)" filter="url(#card)"/>
+  <g transform="rotate(4 502 572)">
+ <clipPath id="tc"><rect x="282" y="352" width="440" height="440" rx="120"/></clipPath>
+ <g clip-path="url(#tc)">
+  <path fill="#2E1648" d="M 260 330 L 744 330 L 744 560 C 730 510 700 476 660 462 Q 650 500 624 524 Q 610 476 582 452 Q 556 500 512 520 Q 468 500 442 452 Q 414 476 400 524 Q 374 500 364 462 C 320 476 290 510 260 560 Z"/>
+ </g>
+ <ellipse cx="420" cy="608" rx="30" ry="40" fill="#2E1648"/><ellipse cx="584" cy="608" rx="30" ry="40" fill="#2E1648"/>
+ <circle cx="410" cy="594" r="11" fill="#fff"/><circle cx="574" cy="594" r="11" fill="#fff"/>
+ <ellipse cx="372" cy="672" rx="30" ry="15" fill="#FF6C98" opacity=".5"/><ellipse cx="632" cy="672" rx="30" ry="15" fill="#FF6C98" opacity=".5"/>
+ <path d="M 482 690 Q 502 706 522 690" fill="none" stroke="#7A2A48" stroke-width="10" stroke-linecap="round"/>
+</g></g><path fill="#7C5CFF" d="M 770 190 Q 780 252 832 262 Q 780 272 770 334 Q 760 272 708 262 Q 760 252 770 190 Z"/></svg>

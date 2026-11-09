@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".25"/></filter><clipPath id="body"><rect x="100" y="100" width="824" height="824" rx="186"/></clipPath>
+<linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF9FF"/><stop offset="1" stop-color="#E6DEFF"/></linearGradient>
+<filter id="lay" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="14" flood-color="#3A1060" flood-opacity=".22"/></filter></defs>
+<rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg2)" filter="url(#sh)"/>
+<g transform="translate(512 0)">
+ <g transform="translate(0 720) matrix(.866 .5 -.866 .5 0 0)" filter="url(#lay)">
+  <rect x="-160" y="-160" width="320" height="320" rx="64" fill="#7C5CFF"/>
+  <circle cx="0" cy="0" r="112" fill="#FFF3EC"/>
+ </g>
+ <g transform="translate(0 525) matrix(.866 .5 -.866 .5 0 0)" filter="url(#lay)">
+  <rect x="-160" y="-160" width="320" height="320" rx="64" fill="#fff" opacity=".6"/>
+  <g transform="rotate(-45)">
+   <ellipse cx="-46" cy="0" rx="22" ry="30" fill="#2B1640"/><ellipse cx="46" cy="0" rx="22" ry="30" fill="#2B1640"/>
+   <path d="M -22 58 Q 0 76 22 58" fill="none" stroke="#E0245E" stroke-width="11" stroke-linecap="round"/>
+  </g>
+ </g>
+ <g transform="translate(0 330) matrix(.866 .5 -.866 .5 0 0)" filter="url(#lay)">
+  <rect x="-160" y="-160" width="320" height="320" rx="64" fill="#E0245E"/>
+  <g transform="rotate(-45)">
+   <path fill="#fff" d="M -118 50 C -128 -70 -72 -118 0 -118 C 72 -118 128 -70 118 50 C 108 10 90 -10 62 -20 Q 56 6 40 20 Q 30 -6 14 -20 Q 6 4 0 14 Q -6 4 -14 -20 Q -30 -6 -40 20 Q -56 6 -62 -20 C -90 -10 -108 10 -118 50 Z"/>
+  </g>
+ </g>
+</g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".25"/></filter><clipPath id="body"><rect x="100" y="100" width="824" height="824" rx="186"/></clipPath>
+<linearGradient id="bg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A6CFF"/><stop offset="1" stop-color="#5B3BD6"/></linearGradient>
+<linearGradient id="hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B1D5C"/><stop offset="1" stop-color="#26123D"/></linearGradient>
+<filter id="win" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="-6" stdDeviation="14" flood-color="#1a0a40" flood-opacity=".3"/></filter></defs>
+<rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg4)" filter="url(#sh)"/>
+<g clip-path="url(#body)">
+ <path fill="url(#hair)" d="M 300 640 C 290 430 380 300 512 300 C 644 300 734 430 724 640 Z"/>
+ <ellipse cx="512" cy="590" rx="180" ry="170" fill="#FFF3EC"/>
+ <path fill="url(#hair)" d="M 330 600 C 312 440 400 340 512 340 C 624 340 712 440 694 600 C 684 540 662 500 630 482 Q 620 514 598 534 Q 586 494 562 474 Q 540 514 512 530 Q 484 514 462 474 Q 438 494 426 534 Q 404 514 394 482 C 362 500 340 540 330 600 Z"/>
+ <ellipse cx="446" cy="610" rx="32" ry="44" fill="#2B1640"/><ellipse cx="578" cy="610" rx="32" ry="44" fill="#2B1640"/>
+ <circle cx="434" cy="594" r="12" fill="#fff"/><circle cx="566" cy="594" r="12" fill="#fff"/>
+ <ellipse cx="398" cy="672" rx="28" ry="14" fill="#FF6C98" opacity=".45"/><ellipse cx="626" cy="672" rx="28" ry="14" fill="#FF6C98" opacity=".45"/>
+ <rect x="150" y="700" width="724" height="300" rx="40" fill="#fff" filter="url(#win)"/>
+ <rect x="150" y="700" width="724" height="70" rx="40" fill="#F4F0FF"/><rect x="150" y="740" width="724" height="30" fill="#F4F0FF"/>
+ <circle cx="206" cy="736" r="13" fill="#FF6C98"/><circle cx="246" cy="736" r="13" fill="#FFB35C"/><circle cx="286" cy="736" r="13" fill="#7FD3A8"/>
+ <ellipse cx="402" cy="704" rx="42" ry="28" fill="#FFF3EC" stroke="#E9C6B8" stroke-width="6"/>
+ <ellipse cx="622" cy="704" rx="42" ry="28" fill="#FFF3EC" stroke="#E9C6B8" stroke-width="6"/>
+</g>
+<path fill="#fff" d="M 770 220 Q 780 282 832 292 Q 780 302 770 364 Q 760 302 708 292 Q 760 282 770 220 Z"/>
+</svg>

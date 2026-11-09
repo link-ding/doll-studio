@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>zh-Hans</string></array>
+  <key>CFBundleExecutable</key><string>DollPet</string>
+  <key>CFBundleIdentifier</key><string>studio.doll.pet</string>
+  <key>CFBundleName</key><string>DollPet</string>
+  <key>CFBundleDisplayName</key><string>DollPet</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
+  <key>CFBundleShortVersionString</key><string>0.1</string>
+  <key>CFBundleVersion</key><string>1</string>
+  <key>LSMinimumSystemVersion</key><string>13.0</string>
+  <key>LSUIElement</key><true/>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSMicrophoneUsageDescription</key><string>DollPet uses your microphone to move the pet's mouth as you talk. Sound is processed on this Mac only and is never recorded or uploaded.</string>
+  <key>NSCameraUsageDescription</key><string>DollPet uses your camera to follow your face so the pet moves with you. Video is processed on this Mac only and is never recorded or uploaded.</string>
+</dict>
+</plist>

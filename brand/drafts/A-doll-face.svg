@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF6C98"/><stop offset="0.55" stop-color="#E0245E"/><stop offset="1" stop-color="#7C5CFF"/>
+    </linearGradient>
+    <linearGradient id="iris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2B1640"/><stop offset="0.5" stop-color="#5B3BD6"/><stop offset="1" stop-color="#FF8FB4"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B1D5C"/><stop offset="1" stop-color="#26123D"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".28"/></filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#2A0A3A" flood-opacity=".35"/></filter>
+    <clipPath id="body"><rect x="100" y="100" width="824" height="824" rx="186"/></clipPath>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg)" filter="url(#sh)"/>
+  <g clip-path="url(#body)">
+    <!-- layer sheets behind the doll: the PSD layers -->
+    <g id="sil">
+      <path d="M 248 640 C 236 400 350 250 512 250 C 674 250 788 400 776 640 C 772 730 786 790 802 826 C 764 852 702 846 680 806 Q 512 740 344 806 C 322 846 260 852 222 826 C 238 790 252 730 248 640 Z"/>
+      <path d="M 268 1000 C 272 900 380 856 512 856 C 644 856 752 900 756 1000 Z"/>
+    </g>
+    <use href="#sil" fill="#fff" opacity=".13" transform="translate(56 -40)"/>
+    <use href="#sil" fill="#fff" opacity=".22" transform="translate(28 -20)"/>
+    <g filter="url(#soft)">
+      <path fill="url(#hair)" d="M 248 640 C 236 400 350 250 512 250 C 674 250 788 400 776 640 C 772 730 786 790 802 826 C 764 852 702 846 680 806 Q 512 740 344 806 C 322 846 260 852 222 826 C 238 790 252 730 248 640 Z"/>
+      <path fill="#FFF7FA" d="M 268 1000 C 272 900 380 856 512 856 C 644 856 752 900 756 1000 Z"/>
+    </g>
+    <path fill="#F3D2C4" d="M 468 760 L 556 760 L 560 870 Q 512 900 464 870 Z"/>
+    <path fill="#FF9CBC" d="M 440 858 Q 512 920 584 858 Q 560 900 512 906 Q 464 900 440 858 Z" opacity=".9"/>
+    <ellipse cx="512" cy="592" rx="208" ry="200" fill="#FFF3EC"/>
+    <!-- bangs -->
+    <path fill="url(#hair)" d="M 288 610 C 262 410 372 300 512 300 C 652 300 762 410 736 610
+      C 724 536 700 486 660 464 Q 650 502 624 526 Q 610 478 582 454 Q 556 502 512 522
+      Q 468 502 442 454 Q 414 478 400 526 Q 374 502 364 464 C 324 486 300 536 288 610 Z"/>
+    <!-- eyes -->
+    <g id="eye">
+      <ellipse cx="432" cy="626" rx="42" ry="56" fill="url(#iris)"/>
+      <circle cx="417" cy="604" r="16" fill="#fff"/>
+      <circle cx="446" cy="650" r="7" fill="#fff" opacity=".85"/>
+      <path d="M 480 616 Q 480 562 432 562 Q 388 562 380 598 L 366 588" fill="none" stroke="#2B1640" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <use href="#eye" transform="translate(1024 0) scale(-1 1)"/>
+    <ellipse cx="368" cy="704" rx="36" ry="18" fill="#FF6C98" opacity=".42"/>
+    <ellipse cx="656" cy="704" rx="36" ry="18" fill="#FF6C98" opacity=".42"/>
+    <path d="M 492 712 Q 512 728 532 712" fill="none" stroke="#7A2A48" stroke-width="10" stroke-linecap="round"/>
+    <!-- sparkle -->
+    <path fill="#fff" d="M 770 200 Q 780 262 832 272 Q 780 282 770 344 Q 760 282 708 272 Q 760 262 770 200 Z"/>
+    <path fill="#fff" opacity=".85" d="M 232 300 Q 237 330 262 335 Q 237 340 232 370 Q 227 340 202 335 Q 227 330 232 300 Z"/>
+  </g>
+</svg>
