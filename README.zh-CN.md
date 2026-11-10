@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-把 See-through 拆好的分层 PSD 直接变成会动的 2D 角色。不依赖 Live2D、Inochi2D；待机动作、口型和面捕移植自开源的 LivLiv Player，面捕模型用 Google MediaPipe（都是 Apache 2.0，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)），全部在本机运行：
+把 See-through（或 [image-to-psd](https://github.com/link-ding/image-to-psd) skill）拆好的分层 PSD 直接变成会动的 2D 角色。不依赖 Live2D、Inochi2D；待机动作、口型和面捕移植自开源的 LivLiv Player，面捕模型用 Google MediaPipe（都是 Apache 2.0，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)），全部在本机运行：
 
 | 模块 | 文件 | 作用 |
 |---|---|---|
@@ -39,6 +39,16 @@ cd doll-studio && python3 -m http.server 8765
 然后打开 <http://localhost:8765>，把 PSD 拖进去。
 
 面捕需要的 MediaPipe 文件（约 17 MB）放在 `vendor/mediapipe/`。没有的话先运行一次 `vendor/fetch-mediapipe.sh`（`desktop-pet/build.sh` 会自动运行）。第一次打开面捕要编译 WebAssembly，浏览器里约 6 秒，DollPet 里约 15 秒，之后同一次运行里再开就很快。
+
+## 准备 PSD：image-to-psd
+
+Doll Studio 高度依赖 **[image-to-psd](https://github.com/link-ding/image-to-psd)**：这是一个给 Claude Code、Codex 等 agent 用的 skill，能把一张角色立绘（PNG / JPG / SVG）拆成分层 PSD，共 19 个标准部件（`back hair`、`front hair`、`face`、`eyewhite`、`irides`、`eyelash`、`mouth`…），每层都有自己的像素和可编辑的蒙版。被挡住的部分它会补画完整，比如前发下面的脸、头后面的后发、虹膜下面的眼白，所以转头时不会露出空洞。它的图层名就是自动绑定认识的名字，拆出来的 PSD 可以直接拖进 Doll Studio。
+
+```bash
+npx skills add link-ding/image-to-psd --skill image-to-psd -g -y
+```
+
+装好后把角色图片发给 agent，说「用 image-to-psd 把这张角色图拆成分层 PSD」就行。完整的图层列表、示例和单独使用的导出脚本见 [image-to-psd 的说明](https://github.com/link-ding/image-to-psd/blob/main/README.zh-CN.md)。
 
 ## 流程
 
@@ -102,8 +112,8 @@ DollPet.app/Contents/MacOS/DollPet notify test         # 发一条测试提醒
 
 ## 对素材的要求
 
-- 图层名能看出是哪个部位（See-through 的输出可以直接用）。
-- 被遮住的部分最好补画完整（See-through 已经补过），否则转头时会露出空洞。
+- 图层名能看出是哪个部位（See-through 和 [image-to-psd](https://github.com/link-ding/image-to-psd) 的输出可以直接用）。
+- 被遮住的部分最好补画完整（See-through 和 image-to-psd 已经补过），否则转头时会露出空洞。
 - 分辨率越高越清晰，768px 能用，2000px 以上效果更好。
 
 ## 还没做的

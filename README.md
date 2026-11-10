@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-Turn a layered PSD split by See-through straight into an animated 2D character. No Live2D or Inochi2D needed. The idle motion, lip sync and face tracking are ported from the open-source LivLiv Player, and the face model is Google MediaPipe (both Apache 2.0, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Everything runs locally:
+Turn a layered PSD split by See-through (or by the [image-to-psd](https://github.com/link-ding/image-to-psd) skill) straight into an animated 2D character. No Live2D or Inochi2D needed. The idle motion, lip sync and face tracking are ported from the open-source LivLiv Player, and the face model is Google MediaPipe (both Apache 2.0, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Everything runs locally:
 
 | Module | Files | What it does |
 |---|---|---|
@@ -39,6 +39,16 @@ cd doll-studio && python3 -m http.server 8765
 Then open <http://localhost:8765> and drop in a PSD.
 
 The MediaPipe files face tracking needs (about 17 MB) live in `vendor/mediapipe/`. If they are missing, run `vendor/fetch-mediapipe.sh` once (`desktop-pet/build.sh` runs it for you). The first time face tracking starts it compiles WebAssembly: about 6 s in a browser, about 15 s in DollPet; turning it on again in the same session is quick.
+
+## Making the PSD: image-to-psd
+
+Doll Studio relies heavily on **[image-to-psd](https://github.com/link-ding/image-to-psd)**, an agent skill (Claude Code, Codex…) that turns a single character illustration (PNG / JPG / SVG) into a layered PSD with 19 standard parts (`back hair`, `front hair`, `face`, `eyewhite`, `irides`, `eyelash`, `mouth`…), each with its own pixels and an editable mask. It fills in what is hidden, such as the face under the bangs, the back hair behind the head and the eye whites under the irises, so turning the head shows no holes. Its layer names are the ones the auto rig recognises, so its PSDs open in Doll Studio as-is.
+
+```bash
+npx skills add link-ding/image-to-psd --skill image-to-psd -g -y
+```
+
+Then give your agent a character image and ask it to "use image-to-psd to split this character artwork into a layered PSD". See the [image-to-psd README](https://github.com/link-ding/image-to-psd#readme) for the full layer list, examples and the standalone export script.
 
 ## Workflow
 
@@ -102,8 +112,8 @@ The config records the app's absolute path, so connect again after moving DollPe
 
 ## Artwork requirements
 
-- Layer names should say which body part they are (See-through output works as-is).
-- Parts that are covered should ideally be painted in fully (See-through already does this), otherwise turning the head shows holes.
+- Layer names should say which body part they are (See-through and [image-to-psd](https://github.com/link-ding/image-to-psd) output work as-is).
+- Parts that are covered should ideally be painted in fully (See-through and image-to-psd already do this), otherwise turning the head shows holes.
 - Higher resolution looks sharper: 768 px works, 2000 px and up looks better.
 
 ## Not done yet
