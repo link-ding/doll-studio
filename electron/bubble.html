@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DollPet</title>
+  <style>
+    html, body { margin: 0; background: transparent; overflow: hidden; font: 13px/1.4 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .b { box-sizing: border-box; margin: 6px; padding: 10px 14px 11px; border-radius: 14px; background: #fff; color: #1d1f27;
+         box-shadow: 0 4px 16px rgba(20, 22, 40, .18), 0 0 0 1px rgba(20, 22, 40, .06); cursor: default; user-select: none; }
+    .t { font-weight: 600; display: flex; gap: 6px; align-items: baseline; }
+    .t::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #0A8F62; align-self: center; }
+    .attention .t::before { background: #E0245E; }
+    .p { color: #8a8f9c; font-weight: 400; font-size: 12px; margin-left: auto; padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+    .m { margin-top: 3px; color: #4a4e5a; overflow-wrap: anywhere; }
+    .m:empty { display: none; }
+  </style>
+</head>
+<body>
+  <div class="b" id="b"><div class="t"><span id="title"></span><span class="p" id="project"></span></div><div class="m" id="body"></div></div>
+  <script>
+    // filled by the main process (main.js, showBubble); clicking it closes it
+    window.show = ({ title, project, body, attention }) => {
+      document.getElementById('title').textContent = title;
+      document.getElementById('project').textContent = project;
+      document.getElementById('body').textContent = body;
+      document.getElementById('b').className = 'b' + (attention ? ' attention' : '');
+      return document.getElementById('b').getBoundingClientRect().height + 12;
+    };
+    // The alert sound where there is no system sound to play (Windows; macOS uses Glass and Ping, see main.js):
+    // a soft rising two-note chime when a task is done, two quick pings when the agent needs the user.
+    let audio = null;
+    window.chime = kind => {
+      audio ??= new AudioContext();
+      const notes = kind === 'attention' ? [[1318.5, 0], [1318.5, 0.16]] : [[1046.5, 0], [1568, 0.11]];
+      for (const [f, at] of notes) {
+        const t = audio.currentTime + at, osc = audio.createOscillator(), gain = audio.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.16, t + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        osc.connect(gain).connect(audio.destination);
+        osc.start(t);
+        osc.stop(t + 0.6);
+      }
+    };
+    addEventListener('click', () => window.close());
+  </script>
+</body>
+</html>

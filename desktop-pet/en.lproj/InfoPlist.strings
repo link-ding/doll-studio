@@ -1,3 +1,0 @@
-/* Microphone and camera permission prompts (English) */
-"NSMicrophoneUsageDescription" = "DollPet uses your microphone to move the pet's mouth as you talk. Sound is processed on this Mac only and is never recorded or uploaded.";
-"NSCameraUsageDescription" = "DollPet uses your camera to follow your face so the pet moves with you. Video is processed on this Mac only and is never recorded or uploaded.";

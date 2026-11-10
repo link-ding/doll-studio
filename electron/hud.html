@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+  <title>DollPet</title>
+  <!-- The panel at the top of the screen while the wallpaper is adjusted on screen (wallpaper.js): what to do, a size
+       slider, and Reset / Cancel / Done. -->
+  <style>
+    :root { --accent: #E0245E; --text: #1A1B22; --muted: #5E626D; --dim: #6B6F7A; --line: #E4E6EC; --border: #DADDE5; }
+    html, body { margin: 0; background: transparent; overflow: hidden; }
+    body { font: 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--text);
+           -webkit-font-smoothing: antialiased; user-select: none; cursor: default; padding: 8px 10px 14px; display: inline-block; }
+    .hud { display: inline-flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 14px; background: #fff;
+           border: 1px solid var(--line); box-shadow: 0 6px 22px rgba(20,22,40,.18); white-space: nowrap; }
+    b { display: block; font-size: 13px; font-weight: 600; }
+    small { font-size: 12px; color: var(--dim); }
+    .slider { display: flex; align-items: center; gap: 8px; color: var(--dim); }
+    .slider svg { fill: currentColor; }
+    input[type=range] { width: 130px; accent-color: var(--accent); }
+    .pct { width: 36px; text-align: right; font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .buttons { display: flex; gap: 6px; }
+    button { font: inherit; font-size: 12px; font-weight: 500; height: 26px; padding: 0 10px; border-radius: 7px; background: #fff;
+             border: 1px solid var(--border); color: var(--text); cursor: default; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    button:active { opacity: .75; }
+  </style>
+</head>
+<body>
+  <div class="hud" id="hud">
+    <div><b id="title"></b><small id="hint"></small></div>
+    <div class="slider">
+      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="3" r="2.2"/><path d="M1 10a4 4 0 0 1 8 0z"/></svg>
+      <input type="range" id="size" min="15" max="100" step="1">
+      <svg width="15" height="15" viewBox="0 0 10 10"><circle cx="5" cy="3" r="2.2"/><path d="M1 10a4 4 0 0 1 8 0z"/></svg>
+      <span class="pct" id="pct"></span>
+    </div>
+    <div class="buttons">
+      <button data-act="reset" id="reset"></button>
+      <button data-act="cancel" id="cancel"></button>
+      <button data-act="done" id="done" class="primary"></button>
+    </div>
+  </div>
+  <script>
+    const $ = id => document.getElementById(id);
+    const send = (act, v) => window.dollpet?.send(act, v);
+    let lang = null;
+    window.dollpet?.onState(s => {
+      const tr = (en, zh) => (s.lang === 'zh' ? zh : en);
+      if (s.lang !== lang) {
+        lang = s.lang;
+        $('title').textContent = tr('Adjust the wallpaper', '调整壁纸');
+        $('hint').textContent = tr('Drag to move. Drag a dot, scroll or pinch to resize.', '拖动来移动。拖圆点、滚动或双指捏合来缩放。');
+        $('reset').textContent = tr('Reset', '重置');
+        $('reset').title = tr('Back to the preset spot at medium size', '回到预设位置和中等大小');
+        $('cancel').textContent = tr('Cancel', '取消');
+        $('done').textContent = tr('Done', '完成');
+        requestAnimationFrame(() => {
+          const r = document.body.getBoundingClientRect();
+          window.dollpet?.resize(r.height, r.width);
+        });
+      }
+      $('size').min = Math.round(s.min * 100);
+      $('size').max = Math.round(s.max * 100);
+      if (document.activeElement !== $('size')) $('size').value = Math.round(s.size * 100);
+      $('pct').textContent = Math.round(s.size * 100) + '%';
+    });
+    $('size').addEventListener('input', e => {
+      $('pct').textContent = e.target.value + '%';
+      send('size', e.target.value / 100);
+    });
+    document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b) send(b.dataset.act); });
+    addEventListener('keydown', e => {
+      if (e.key === 'Escape') send('cancel');
+      else if (e.key === 'Enter') send('done');
+    });
+  </script>
+</body>
+</html>

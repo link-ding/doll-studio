@@ -1,5 +1,5 @@
-// Desktop-pet page, hosted by the native macOS app (desktop-pet/). The host drives it
-// through window.pet and listens for messages on webkit.messageHandlers.pet.
+// Desktop-pet page, hosted by the desktop app (electron/). The host drives it through window.pet and listens for
+// messages on webkit.messageHandlers.pet (electron/preload.js provides it).
 
 import { startPlayer, contentBounds, edgeBounds, snapshot } from './player.js';
 import { sceneSVG, sceneStill } from './scenes.js';

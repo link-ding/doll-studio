@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+  <title>DollPet</title>
+  <!-- The tray popover: the current pet, quick toggles, size, task
+       alerts, recent models and the app commands. main.js sends the state (window.dollpet.onState) and runs the
+       actions (window.dollpet.send); preload.js provides both. -->
+  <style>
+    :root {
+      --accent: #E0245E; --text: #1A1B22; --text2: #3D404A; --muted: #5E626D; --dim: #6B6F7A;
+      --line: #E4E6EC; --border: #DADDE5; --tile: #F3F4F8; --card: #F5F6FA; --green: #0B7A50; --off: #E9EBF1;
+      --violet: #6D4AFF; --blue: #1F6FEB; --pink: #E0245E; --teal: #0A8F62; --orange: #E8590C; --rose: #C2255C;
+      --panel: #F8F9FB; --seg: #ECEEF3;
+    }
+    /* macOS: the window is a vibrant popover material, so the panel lets it through */
+    .mac { --tile: rgba(255,255,255,.55); --card: rgba(255,255,255,.6); --off: rgba(225,228,236,.9); --panel: rgba(246,247,250,.55); --seg: rgba(230,232,239,.75); --line: rgba(20,22,40,.09); }
+    html, body { margin: 0; background: transparent; overflow: hidden; }
+    body { font: 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--text);
+           -webkit-font-smoothing: antialiased; user-select: none; cursor: default; }
+    #panel { width: 344px; box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; gap: 12px; background: var(--panel); }
+    /* Windows: a card with its own corners and shadow inside a transparent window */
+    .win body { padding: 8px; }
+    .win #panel { border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(20,22,40,.18); }
+    button { font: inherit; color: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: default; text-align: left; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    svg.i { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+    .head { display: flex; align-items: center; gap: 12px; padding: 4px 4px 0; }
+    .thumb { width: 46px; height: 46px; border-radius: 13px; background: var(--card); border: 1px solid var(--line); display: grid; place-items: center; flex: none; overflow: hidden; }
+    .thumb i { width: 22px; height: 22px; border-radius: 50%; background: #C9B6F7; }
+    .thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .who { flex: 1; min-width: 0; }
+    .who b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .who span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .who span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .edit { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); }
+    .edit:hover { background: var(--tile); color: var(--text); }
+
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tile { display: flex; align-items: center; gap: 10px; min-height: 56px; box-sizing: border-box; padding: 10px; border-radius: 12px;
+            background: var(--tile); border: 1px solid var(--line); transition: background .15s, border-color .15s; }
+    .tile .dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--off); color: var(--text2); flex: none; transition: background .15s, color .15s; }
+    .tile .dot svg { width: 14px; height: 14px; }
+    .tile b { display: block; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+    .tile small { font-size: 11.5px; color: var(--muted); }
+    .tile.on { background: color-mix(in srgb, var(--c) 10%, var(--tile)); border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+    .tile.on .dot { background: var(--c); color: #fff; }
+    .tile:active { transform: scale(.985); }
+
+    .note { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--tile); font-size: 11.5px; color: var(--muted); }
+    .note span { flex: 1; }
+    .soft { font-size: 12px; font-weight: 500; height: 26px; padding: 0 10px; border-radius: 7px; background: #fff; border: 1px solid var(--border); white-space: nowrap; flex: none; }
+    .soft.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .soft:hover { filter: brightness(.97); }
+    .soft:active { opacity: .75; }
+
+    .cap { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--dim); }
+    .group { display: flex; flex-direction: column; gap: 6px; }
+    .group > .cap { padding: 0 2px; }
+    .seg { display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--seg); border: 1px solid var(--line); }
+    .seg button { flex: 1; text-align: center; min-height: 28px; border-radius: 7px; font-size: 12px; font-weight: 500; color: var(--muted); }
+    .seg button.on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .seg button:not(.on):hover { color: var(--text); }
+
+    .alerts { padding: 8px; border-radius: 12px; background: var(--tile); border: 1px solid var(--line); }
+    .alerts .top { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 6px; }
+    .link { font-size: 12px; color: var(--muted); }
+    .link:hover { color: var(--text); }
+    .agent { display: flex; align-items: center; gap: 10px; padding: 5px 4px; }
+    .badge { width: 28px; height: 28px; border-radius: 8px; background: var(--off); display: grid; place-items: center; font-size: 10.5px; font-weight: 700; flex: none; }
+    .agent div { flex: 1; }
+    .agent b { display: block; font-size: 13px; font-weight: 500; }
+    .agent small { font-size: 11.5px; color: var(--muted); }
+    .agent small.ok { color: var(--green); }
+
+    .rows { display: flex; flex-direction: column; }
+    .rows > .cap { padding: 0 6px 4px; }
+    .row { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 7px; width: 100%; box-sizing: border-box; }
+    .row .ic { width: 16px; display: grid; place-items: center; color: var(--muted); flex: none; }
+    .row .ic.check { color: var(--accent); }
+    .row .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+    .row kbd { font: 12px/1 inherit; color: var(--dim); }
+    .row:hover { background: var(--accent); color: #fff; }
+    .row:hover .ic, .row:hover kbd { color: rgba(255,255,255,.88); }
+    .empty { font-size: 12px; color: var(--dim); padding: 6px 10px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 0 6px; }
+    .tile:disabled { opacity: .45; }
+    .tile:disabled:active { transform: none; }
+    .seg button:disabled { opacity: .45; }
+    .wide { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 28px; border-radius: 9px; background: var(--tile);
+            border: 1px solid var(--line); font-size: 12px; font-weight: 500; }
+    .wide:hover { filter: brightness(.97); }
+    .bgline { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 0; font-size: 12px; color: var(--muted); }
+    .bgline span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .swatches { display: grid; grid-template-columns: repeat(8, 30px); gap: 4px 6px; padding: 0 2px; }
+    .sw { width: 30px; height: 30px; border-radius: 10px; padding: 3px; box-sizing: border-box; border: 2px solid transparent; }
+    .sw.on { border-color: var(--accent); }
+    .sw span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 7px; overflow: hidden; background: var(--card);
+               border: 1px solid var(--border); box-sizing: border-box; color: var(--muted); }
+    .sw img { width: 100%; height: 100%; object-fit: cover; }
+    .sw svg.i { width: 12px; height: 12px; }
+    .swatches.drop .sw span { border-style: dashed; border-color: var(--accent); }
+    .lang { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 4px 0 10px; }
+    .lang .ic { width: 16px; display: grid; place-items: center; color: var(--muted); }
+    .lang .t { flex: 1; font-size: 13px; }
+    .lang .seg { padding: 2px; }
+    .lang .seg button { flex: none; min-height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
+    <symbol id="cursor" viewBox="0 0 24 24"><path d="M4 4l7.07 16.97 2.51-7.39 7.39-2.51L4 4z"/></symbol>
+    <symbol id="mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></symbol>
+    <symbol id="camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="sound" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
+    <symbol id="pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+    <symbol id="folder" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></symbol>
+    <symbol id="layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+    <symbol id="power" viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="move" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="m15 19-3 3-3-3M19 9l3 3-3 3M5 9l-3 3 3 3M9 5l3-3 3 3"/></symbol>
+    <symbol id="monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
+  <div id="panel"></div>
+  <script>
+    document.documentElement.className = window.dollpet?.platform === 'darwin' ? 'mac' : 'win';
+    const panel = document.getElementById('panel');
+    let S = null, W = null;
+    const tr = (en, zh) => (S?.lang === 'zh' ? zh : en);
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const icon = id => `<svg class="i"><use href="#${id}"/></svg>`;
+    const send = (act, value) => window.dollpet?.send(act, value);
+
+    function tile(key, title, ic, color, disabled = false) {
+      const on = !!S.toggles[key];
+      return `<button class="tile${on ? ' on' : ''}" style="--c:var(--${color})" data-act="toggle" data-v="${key}" aria-pressed="${on}"${disabled ? ' disabled' : ''}>
+        <span class="dot">${icon(ic)}</span><span><b>${title}</b><small>${on ? tr('On', '开') : tr('Off', '关')}</small></span></button>`;
+    }
+    function agent(key, name, badge) {
+      const on = !!S.agents[key];
+      return `<div class="agent"><span class="badge">${badge}</span><div><b>${name}</b>
+        <small class="${on ? 'ok' : ''}">${on ? tr('Connected', '已连接') : tr('Not connected', '未连接')}</small></div>
+        <button class="soft${on ? '' : ' primary'}" data-act="agent" data-v="${key}">${on ? tr('Disconnect', '断开') : tr('Connect', '连接')}</button></div>`;
+    }
+    const row = (act, title, ic, kbd = '', v = '', cls = '') =>
+      `<button class="row" data-act="${act}" data-v="${esc(v)}"${v ? ` title="${esc(v)}"` : ''}><span class="ic ${cls}">${ic ? icon(ic) : ''}</span><span class="t">${esc(title)}</span><kbd>${esc(kbd)}</kbd></button>`;
+
+    // the wallpaper's size, where the character stands, adjusting it on screen, and the backgrounds
+    function wallpaperControls() {
+      const swatch = b => {
+        const inner = b.thumb ? `<img src="${esc(b.thumb)}" alt="">` : icon(b.kind === 'desktop' ? 'monitor' : 'plus');
+        return `<button class="sw${W.background === b.id ? ' on' : ''}" data-act="wallBg" data-v="${esc(b.id)}" data-kind="${b.kind}" title="${esc(b.name)}" aria-label="${esc(b.name)}"><span>${inner}</span></button>`;
+      };
+      return `<div class="group"><span class="cap">${tr('Wallpaper', '壁纸')}</span>
+        <div class="seg">${W.sizes.map(([v, name]) => `<button class="${Math.abs(W.size - v) < 0.01 ? 'on' : ''}" data-act="wallSize" data-v="${v}">${esc(name)}</button>`).join('')}</div>
+        <div class="seg">${W.aligns.map(([v, name]) => `<button class="${W.align === v ? 'on' : ''}" data-act="wallAlign" data-v="${v}">${esc(name)}</button>`).join('')}</div>
+        <button class="wide" data-act="wallAdjust" title="${tr('Drag the character anywhere on the wallpaper and resize it freely', '把角色拖到壁纸上任意位置，自由缩放')}">${icon('move')}${tr('Adjust on screen…', '在屏幕上调整…')}</button>
+        <div class="bgline"><span>${esc(W.backgroundName)}</span>${W.canRestore
+          ? `<button class="link" data-act="wallRestore" title="${tr('Put back the desktop picture you had before DollPet changed it', '换回 DollPet 修改之前你的桌面图片')}">${tr('Restore my picture', '恢复我的壁纸')}</button>` : ''}</div>
+        <div class="swatches" id="swatches">${W.backgrounds.map(swatch).join('')}${swatch({ id: 'add', kind: 'add', name: tr('Add a picture…', '添加图片…') })}</div>
+      </div>`;
+    }
+
+    function render() {
+      const m = S.mod;
+      W = S.wall;
+      panel.innerHTML = `
+        <div class="head">
+          <div class="thumb">${S.thumb ? `<img src="${esc(S.thumb)}" alt="">` : '<i></i>'}</div>
+          <div class="who"><b title="${esc(S.title)}">${esc(S.title)}</b><span>${W.on
+            ? `${tr('As your wallpaper', '作为壁纸')} · ${esc(W.sizeName)}` : `${tr('On your desktop', '在桌面上')} · ${esc(S.sizeName)}`}</span></div>
+          <button class="edit" data-act="editCurrent" title="${tr('Edit in the editor', '在编辑器里编辑')}" aria-label="${tr('Edit this model in the editor', '在编辑器里编辑这个模型')}">${icon('pencil')}</button>
+        </div>
+        <div class="seg">
+          <button class="${W.on ? '' : 'on'}" data-act="mode" data-v="pet">${tr('Desktop pet', '桌宠')}</button>
+          <button class="${W.on ? 'on' : ''}" data-act="mode" data-v="wallpaper"${W.available ? '' : ` disabled title="${tr('Not available on this system', '这台电脑上不可用')}"`}>${tr('Wallpaper', '壁纸')}</button>
+        </div>
+        <div class="tiles">
+          ${tile('onTop', tr('Always on top', '置顶'), 'pin', 'violet', W.on)}
+          ${tile('follow', tr('Follow cursor', '跟随鼠标'), 'cursor', 'blue')}
+          ${tile('mic', tr('Lip sync', '麦克风口型'), 'mic', 'pink')}
+          ${tile('camera', tr('Face tracking', '面部捕捉'), 'camera', 'teal')}
+          ${tile('locked', tr('Click-through', '鼠标穿透'), 'lock', 'orange', W.on)}
+          ${tile('sound', tr('Alert sound', '提示音'), 'sound', 'rose')}
+        </div>
+        ${S.toggles.camera ? `<div class="note"><span>${tr('Hold still facing the camera for a second to auto-calibrate.', '正对摄像头静止一秒会自动校准。')}</span>
+          <button class="soft" data-act="calibrate">${tr('Calibrate', '校准')}</button></div>` : ''}
+        ${W.on ? wallpaperControls() : `<div class="group"><span class="cap">${tr('Pet size', '桌宠大小')}</span>
+          <div class="seg">${S.sizes.map(([h, name]) => `<button class="${S.size === h ? 'on' : ''}" data-act="size" data-v="${h}">${esc(name)}</button>`).join('')}</div>
+        </div>`}
+        <div class="alerts">
+          <div class="top"><span class="cap">${tr('Task alerts', '任务提醒')}</span><button class="link" data-act="test">${tr('Send test', '发送测试')}</button></div>
+          ${agent('claude', 'Claude Code', 'CC')}
+          ${agent('codex', 'Codex', 'CX')}
+        </div>
+        <div class="rows"><span class="cap">${tr('Recent models', '最近的模型')}</span>
+          ${S.recents.length ? S.recents.map(r => row('recent', r.name, r.current ? 'check' : '', r.ago, r.path, 'check')).join('')
+            : `<div class="empty">${tr('Models you open show up here.', '打开过的模型会显示在这里。')}</div>`}
+        </div>
+        <hr>
+        <div class="rows">
+          ${row('openModel', tr('Open Model…', '打开模型…'), 'folder', m + 'O')}
+          ${row('openEditor', tr('Open Editor', '打开编辑器'), 'layers', m + 'E')}
+          <div class="lang"><span class="ic">${icon('globe')}</span><span class="t">${tr('Language', '语言')}</span>
+            <div class="seg">${[['system', tr('Auto', '自动')], ['zh', '中文'], ['en', 'EN']].map(([v, n]) =>
+              `<button class="${S.langSetting === v ? 'on' : ''}" data-act="lang" data-v="${v}">${n}</button>`).join('')}</div></div>
+          ${row('quit', tr('Quit DollPet', '退出 DollPet'), 'power', m + 'Q')}
+        </div>`;
+      // the window takes the panel's height
+      requestAnimationFrame(() => window.dollpet?.resize(Math.ceil(document.body.getBoundingClientRect().height)));
+    }
+
+    panel.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (b) send(b.dataset.act, b.dataset.v);
+    });
+    addEventListener('keydown', e => {
+      if (e.key === 'Escape') return send('close');
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const act = { o: 'openModel', e: 'openEditor', q: 'quit' }[e.key.toLowerCase()];
+      if (act) { e.preventDefault(); send(act); }
+    });
+    // a picture's swatch: Show in Finder / Remove on a right click
+    panel.addEventListener('contextmenu', e => {
+      const b = e.target.closest('.sw[data-kind="picture"]');
+      if (b) { e.preventDefault(); send('wallBgMenu', b.dataset.v); }
+    });
+    // pictures dropped on the swatches are added (preload.js reads their paths)
+    addEventListener('dragover', e => { e.preventDefault(); document.getElementById('swatches')?.classList.add('drop'); });
+    addEventListener('dragleave', e => { if (!e.relatedTarget) document.getElementById('swatches')?.classList.remove('drop'); });
+    addEventListener('drop', e => { e.preventDefault(); document.getElementById('swatches')?.classList.remove('drop'); });
+    window.dollpet?.onState(s => { S = s; render(); });
+  </script>
+</body>
+</html>

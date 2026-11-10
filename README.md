@@ -16,7 +16,7 @@ Turn a layered PSD split by See-through (or by the [image-to-psd](https://github
 | Lip sync | `src/voice.js` | Microphone auto-gain, splitting o/u (round) and i/e (flat) by spectrum |
 | Face tracking | `src/tracking.js` + `vendor/mediapipe/` | Camera → head turn, blinks, gaze, brows, mouth, smile; calibrates itself after a second of holding still facing the camera |
 | Model format | `src/format.js` | `.doll` files, see [FORMAT.md](FORMAT.md) |
-| Interface language | `src/i18n.js` `desktop-pet/Lang.swift` | English and Chinese, switchable live |
+| Interface language | `src/i18n.js` `electron/main.js` | English and Chinese, switchable live |
 | Editor | `index.html` `src/editor.js` | Open a PSD, adjust the rig, preview live, export |
 | Player | `player.html` `src/player.js` | Plays a `.doll`; works as a browser source in streaming apps |
 
@@ -25,7 +25,7 @@ Turn a layered PSD split by See-through (or by the [image-to-psd](https://github
 The editor, the player and DollPet's menus and settings all come in English and Chinese:
 
 - The web pages (editor, player) follow the browser's language. The **EN / 中文** button in the header / control bar switches at any time and the choice is remembered in the browser; add `?lang=en` or `?lang=zh` to the URL to pin a language.
-- DollPet follows macOS's preferred language. In the Settings window, top right, pick **Auto / EN / 中文**: the menus, settings, the pet's alert bubbles and the editor switch at once. The editor's language button switches the whole app too.
+- DollPet follows the system's preferred language. At the bottom of its popover, pick **Auto / 中文 / EN**: the menus, the popover, the pet's alert bubbles and the editor switch at once. The editor's language button switches the whole app too.
 - Exported web pages follow the viewer's browser language.
 
 ## Running
@@ -38,7 +38,7 @@ cd doll-studio && python3 -m http.server 8765
 
 Then open <http://localhost:8765> and drop in a PSD.
 
-The MediaPipe files face tracking needs (about 17 MB) live in `vendor/mediapipe/`. If they are missing, run `vendor/fetch-mediapipe.sh` once (`desktop-pet/build.sh` runs it for you). The first time face tracking starts it compiles WebAssembly: about 6 s in a browser, about 15 s in DollPet; turning it on again in the same session is quick.
+The MediaPipe files face tracking needs (about 17 MB) live in `vendor/mediapipe/`. If they are missing, run `vendor/fetch-mediapipe.sh` once. The first time face tracking starts it compiles WebAssembly: about 6 s in a browser, about 15 s in DollPet; turning it on again in the same session is quick.
 
 ## Making the PSD: image-to-psd
 
@@ -71,44 +71,55 @@ http://localhost:8765/player.html?model=your-model.doll&bg=transparent
 
 Press H in the player to hide its controls; add `&lang=en` or `&lang=zh` to pin the interface language. With **Lip sync** on, the mouth moves as you talk.
 
-## Mac app (desktop pet + editor)
+## Desktop app (Windows and macOS)
 
-`desktop-pet/` packages the editor and the desktop pet as a native macOS app, DollPet.app, using only system frameworks (AppKit, WebKit, AVFoundation). The web files ship inside the app and the app serves them itself, so no local server is needed.
+DollPet puts the editor and the desktop pet in one app for Windows and macOS, built with Electron (`electron/`). The web files ship inside the app and the app serves them itself, so no local server is needed. `src/` has nothing Electron-specific: `electron/preload.js` gives the pages their host interface.
 
-```bash
-./desktop-pet/build.sh                  # bundles samples/seethrough.psd as the default model
-./desktop-pet/build.sh my-model.doll    # bundle a different default model
-open desktop-pet/build/DollPet.app
-```
+### Download
 
-The icon sources are in `brand/`: `app-icon.svg` is the app icon, `logo-mark.svg` is the mark in the editor header and the web favicon, and `menubar-template.svg` is the menu bar icon. After changing an SVG, run `brand/make-icons.sh` (needs Google Chrome to render) to regenerate `desktop-pet/AppIcon.icns` and `desktop-pet/MenuBarIcon*.png`.
+Get the installer from [Releases](https://github.com/link-ding/doll-studio/releases):
 
-- Menu bar ✦ → **Open Editor…** (⌘E) opens the editor window; **Set as Desktop Pet** in the editor puts the current model on the desktop right away (saved as `~/Library/Application Support/DollPet/current.doll`)
-- Exporting from the editor brings up the system save dialog
-- Transparent, borderless and always on top; the mouse passes straight through the transparent area around the character
-- The gaze follows the mouse anywhere on screen; drag the character to move it, click it and it smiles
-- The ✦ menu bar icon, or right-clicking the character, opens the menu: open a model (.doll or PSD), size, always on top, follow cursor, lip sync, lock position
-- Remembers the last model and position
-- The eyelid lines, control points, part types and physics you set in the editor are remembered per file and restored next time; a re-exported or re-downloaded copy of the same character (renamed or in another folder) gets the earlier settings too (it is matched by the auto-measured position of the eyes and mouth)
+- `DollPet-<version>-mac-arm64.dmg`: Macs with Apple silicon (M1 and later)
+- `DollPet-<version>-mac-x64.dmg`: Intel Macs only
+- `DollPet-<version>-windows-x64-setup.exe`: most Windows PCs (`…-windows-arm64-setup.exe` for Windows on Arm)
+
+The builds are not signed yet. On Windows, SmartScreen warns the first time: More info → Run anyway. On macOS, open the app once, then allow it in System Settings › Privacy & Security › Open Anyway.
+
+### Using it
+
+- Click the tray icon (in the menu bar on macOS) for the popover: the current model, quick toggles (always on top, follow cursor, lip sync, face tracking, click-through, alert sound), size, Desktop pet / Wallpaper, task alerts, recent models and language. Right-click it, or the character, for the classic menu.
+- **Open Editor** opens the editor window; **Set as Desktop Pet** in the editor puts the current model on the desktop right away. Exporting brings up the system save dialog.
+- The pet is transparent, borderless and always on top; the mouse passes through the transparent area around the character. The gaze follows the mouse anywhere on screen; drag the character to move it, click it and it smiles.
+- The eyelid lines, control points, part types and physics you set in the editor are remembered per file and restored next time; a re-exported or re-downloaded copy of the same character gets the earlier settings too (matched by the auto-measured position of the eyes and mouth).
+- Remembers the last model, position and settings, in `~/Library/Application Support/DollPet` (macOS) or `%APPDATA%\DollPet` (Windows).
+
+### Wallpaper mode
+
+Switch the popover to **Wallpaper** and the character lives on the desktop, under the icons, over the desktop picture, an animated scene, a room or a picture of your own (**+**, or drop pictures on the swatches). Pick a size and a side, or **Adjust on screen…**: drag the character, drag a dot on its top edge, scroll or pinch to resize, arrow keys to nudge, Return to keep, Escape to cancel. A scene, room or picture also becomes the system desktop picture; going back to the pet, or **Restore my picture**, puts yours back.
+
+Electron has no way to put a window under the desktop icons, so `electron/native.js` calls the system through [koffi](https://koffi.dev/): on macOS the window goes to the level just under the icons, on Windows into the desktop's WorkerW window. The Windows part is new and has not been tried on many machines yet.
 
 ### Task alerts (Claude Code / Codex)
 
-Menu ✦ → **Settings…** (⌘,). In **Task Alerts**, turn on the Claude Code / Codex switch to connect, and click again to disconnect. Once connected, when a task finishes a bubble pops up above the pet (which tool, which project, its last line), the pet smiles and a sound plays; when Claude Code needs you to approve a permission, the bubble turns orange and the pet widens its eyes and nods.
-
-How it works:
+In the popover, **Connect** next to Claude Code or Codex (click **Disconnect** to undo). When a task finishes a bubble pops up above the pet (which tool, which project, its last line), the pet smiles and a sound plays; when Claude Code needs you to approve a permission, the bubble turns orange and the pet widens its eyes and nods.
 
 - Claude Code: adds `Stop` and `Notification` hooks to `~/.claude/settings.json`, running `DollPet notify claude`
 - Codex: adds `notify = ["…/DollPet", "notify", "codex"]` at the top of `~/.codex/config.toml`
-- `DollPet notify` boils the event down to one line and hands it to the running pet as a macOS distributed notification; if the pet isn't running it does nothing and never gets in Claude Code's or Codex's way
+- `DollPet notify` boils the event down to one line and hands it to the running pet; if the pet isn't running it does nothing and never gets in Claude Code's or Codex's way
 
-Before changing a config file DollPet backs it up as `.dollpet-backup` (only the state before the latest change), and also keeps the last ten copies by time in `~/Library/Application Support/DollPet/Backups/`. Config files are replaced whole, so an error midway never leaves half a file; a symlinked config is written to the file it points to. Your other hooks are kept; if Codex already has another notify program, it isn't overwritten. From the command line:
+Before changing a config file DollPet backs it up as `.dollpet-backup`, and keeps the last ten copies by time in its `Backups` folder. Config files are replaced whole, and a symlinked config is written to the file it points to. Your other hooks are kept; if Codex already has another notify program, DollPet runs it too and puts it back when disconnected. The config records the app's path, so connect again after moving the app.
+
+### Building
 
 ```bash
-DollPet.app/Contents/MacOS/DollPet connect claude      # or codex; disconnect to remove
-DollPet.app/Contents/MacOS/DollPet notify test         # send a test alert
+cd electron && npm install
+npm start                      # the pet (npm start -- --editor also opens the editor)
+npm run dist:mac               # or dist:win: installers in electron/dist
 ```
 
-The config records the app's absolute path, so connect again after moving DollPet.app.
+`vendor/fetch-mediapipe.sh` must have run once (face tracking). When `samples/seethrough.psd` is there, `npm start` shows it before you pick a model. The **Desktop app** workflow (`.github/workflows/desktop.yml`) builds the Windows and macOS installers on GitHub's machines; pushing a tag such as `v0.1.0` attaches them to a release.
+
+The icon sources are in `brand/`: `app-icon.svg` is the app icon, `logo-mark.svg` is the mark in the editor header and the web favicon, and `menubar-template.svg` is the menu bar icon. After changing an SVG, run `brand/make-icons.sh` (needs Google Chrome to render) to regenerate the icons in `electron/build` and `electron/assets`.
 
 ## Artwork requirements
 

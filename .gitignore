@@ -1,13 +1,14 @@
 # macOS
 .DS_Store
 
-# build output of desktop-pet/build.sh
-desktop-pet/build/
+# build output of the desktop app (electron/), and its dependencies
+electron/dist/
+electron/node_modules/
 
-# MediaPipe files, downloaded by vendor/fetch-mediapipe.sh (desktop-pet/build.sh runs it)
+# MediaPipe files, downloaded by vendor/fetch-mediapipe.sh
 vendor/mediapipe/
 
-# the sample character is not published; build.sh bundles it only when it is present
+# the sample character is not published; `npm start` in electron/ shows it when it is present
 samples/
 
 # config backups DollPet makes

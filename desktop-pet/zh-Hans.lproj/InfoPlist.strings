@@ -1,3 +1,0 @@
-/* 麦克风和摄像头权限说明（中文） */
-"NSMicrophoneUsageDescription" = "用麦克风的声音驱动桌宠的口型。声音只在本机处理，不会录音或上传。";
-"NSCameraUsageDescription" = "用摄像头识别你的脸部动作，让桌宠跟着动。画面只在本机处理，不会录像或上传。";

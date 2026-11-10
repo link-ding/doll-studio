@@ -1,0 +1,110 @@
+{
+  "name": "dollpet",
+  "productName": "DollPet",
+  "version": "0.1.0",
+  "description": "Doll Studio desktop pet and editor for Windows and macOS (Electron)",
+  "main": "main.js",
+  "private": true,
+  "license": "MIT",
+  "author": "link-ding",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "studio.doll.pet",
+    "productName": "DollPet",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "agents.js",
+      "native.js",
+      "wallpaper.js",
+      "bubble.html",
+      "popover.html",
+      "hud.html",
+      "assets/**"
+    ],
+    "extraResources": [
+      {
+        "from": "..",
+        "to": "web",
+        "filter": [
+          "index.html",
+          "player.html",
+          "pet.html",
+          "src/**",
+          "vendor/mediapipe/**",
+          "backgrounds/**",
+          "brand/logo-mark.svg"
+        ]
+      },
+      {
+        "from": "..",
+        "to": ".",
+        "filter": [
+          "THIRD_PARTY_NOTICES.md",
+          "licenses/**"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "category": "public.app-category.entertainment",
+      "icon": "build/icon.png",
+      "extendInfo": {
+        "LSUIElement": true,
+        "NSCameraUsageDescription": "DollPet uses the camera for face tracking. Video stays on this computer.",
+        "NSMicrophoneUsageDescription": "DollPet uses the microphone so the character's mouth moves when you talk. Audio stays on this computer."
+      },
+      "identity": "-",
+      "hardenedRuntime": false,
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-${version}-windows-${arch}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "dependencies": {
+    "koffi": "^3.3.7"
+  }
+}
